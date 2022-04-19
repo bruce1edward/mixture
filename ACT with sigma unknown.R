@@ -33,10 +33,10 @@ sigma <- mean(residuals(lm_naive)^2)
 
 # marginal distribution of y's is a scale mixture
 gamma <- exp(drop(mu))
-dens_y  <- function(y) rowMeans(sweep(dweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma), MARGIN = 2, FUN = "/", STATS = gamma))
+dens_y  <- function(y, sigma) rowMeans(sweep(dweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma), MARGIN = 2, FUN = "/", STATS = gamma))
 fymu <- function(mu, sigma) dweibull(yperm, shape = 1/sigma, scale = exp(mu))
-fy <- dens_y(yperm)
-nloglik_marginal <- function(mu, sigma, alpha) sum(-log((1-alpha) * fymu(mu, sigma) + alpha * fy))
+fy <- function(sigma) dens_y(yperm, sigma)
+nloglik_marginal <- function(mu, sigma, alpha) sum(-log((1-alpha) * fymu(mu, sigma) + alpha * fy(sigma)))
 maxiter <- 1000
 tol <- 1E-4
 objs <- numeric(maxiter)
@@ -45,7 +45,7 @@ objs[iter] <- nloglik_marginal(mu, sigma, alpha)
 # marginal approach
 while(iter < maxiter){
   num <- (1-alpha) * fymu(mu, sigma)
-  denom <- num + alpha * fy
+  denom <- num + alpha * fy(sigma)
   pcur <- num/denom
   alpha <- 1 - mean(pcur)
   lm_pcur <- survreg(Surv(yperm, event = rep(1,n)) ~ X - 1, scale = sigma, dist = "weibull", weights = pmax(pcur, 1E-6))
@@ -65,9 +65,10 @@ sqrt(sum((beta - betacur)^2))
 ### now, additionally add censoring
 cens <- (yperm >= 3) # 11% censored
 fymu <- function(mu, cens, sigma) dweibull(yperm, shape = 1/sigma, scale = exp(mu))^(1 - cens)  * (1 - pweibull(yperm, shape = 1/sigma, scale = exp(mu)))^cens
-dens_y  <- function(y, cens) rowMeans(sweep(dweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma), MARGIN = 2, FUN = "/", STATS = gamma))^(1-cens) * (1 - rowMeans(pweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma)))^cens
-fy <- dens_y(yperm, cens)
-nloglik_marginal <- function(mu, cens, sigma, alpha) sum(-log((1-alpha) * fymu(mu, cens, sigma) + alpha * fy))
+dens_y  <- function(y, cens, sigma) rowMeans(sweep(dweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma), MARGIN = 2, FUN = "/", STATS = gamma))^(1-cens) * (1 - rowMeans(pweibull(outer(y, gamma, FUN = "/"), shape = 1/sigma)))^cens
+#############Since sigma is unknown, need to update sigma as well ###############################
+fy <- function(sigma) dens_y(yperm, cens, sigma)
+nloglik_marginal <- function(mu, cens, sigma, alpha) sum(-log((1-alpha) * fymu(mu, cens, sigma) + alpha * fy(sigma)))
 ###########################initial estimator (log normal) ################################## better
 lm_naive <- lm(log(yperm[!cens]) ~ X[!cens,] - 1, )
 betacur <- coef(lm_naive)
@@ -86,7 +87,7 @@ iter <- 1
 objs[iter] <- nloglik_marginal(mu, cens, sigma, alpha)
 while(iter < maxiter){
   num <- (1-alpha) * fymu(mu, cens, sigma)
-  denom <- num + alpha * fy
+  denom <- num + alpha * fy(sigma)
   pcur <- num/denom
   alpha <- 1 - mean(pcur)
   lm_pcur <- survreg(Surv(yperm, event = 1 - cens) ~ X - 1, scale = sigma, dist = "weibull", weights = pmax(pcur, 1E-6))
