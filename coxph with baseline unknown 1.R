@@ -32,12 +32,16 @@ mu <- X %*% creg_naive$coef
 
 ###################### smoothed #################
 
-lambdahat_0 <- 4*yperm^3#lambdahat(yperm, 0.1)
-Lambdahat_0 <- yperm^4#Lambdahat(yperm, 0.1)
+lambdahat_0_g <- 4*yperm^3#lambdahat(yperm, 0.1)
+Lambdahat_0_g <- yperm^4#Lambdahat(yperm, 0.1)
+
+################## initialize baseline function #############
+lambdahat_0 <- lambdahat_0_g
+Lambdahat_0 <- Lambdahat_0_g
 
 fymu <- function(mu, cens, l0, L0) (exp(mu) * l0)^(1 - cens) *  exp(-exp(mu) * L0)
 fy <- function(l0, L0) l0^(1-cens) * exp(-L0)^cens
-nloglik_marginal <- function(mu, cens, alpha, l0, L0) sum(-log((1-alpha) * fymu(mu, cens, l0, L0) + alpha * fy(l0, L0)), na.rm = TRUE)
+nloglik_marginal <- function(mu, cens, alpha, l0, L0) sum(-log((1-alpha) * fymu(mu, cens, l0, L0) + alpha * fy(lambdahat_0_g, Lambdahat_0_g)), na.rm = TRUE)
 # update weights and alpha; then repeat
 iter <- 1
 objs[iter] <- nloglik_marginal(mu, cens, alpha, lambdahat_0, Lambdahat_0)
@@ -45,7 +49,7 @@ beta_cur <- creg_naive$coef
 # marginal approach
 while(iter < maxiter){
   num <- (1-alpha) * fymu(mu, cens, lambdahat_0, Lambdahat_0)
-  denom <- num + alpha * fy(lambdahat_0, Lambdahat_0)
+  denom <- num + alpha * fy(lambdahat_0_g, Lambdahat_0_g)
   pcur <- num/denom
   alpha <- 1 - mean(pcur)
   #################partially likelihood for estimating beta#############################
