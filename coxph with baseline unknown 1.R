@@ -89,16 +89,20 @@ while(iter < maxiter){
   Lambdahat_0_ <- Breslow_Estimator1$hazard
   #plot(Breslow_Estimator$time, Breslow_Estimator1$time)
   #plot(Lambdahat_0, Lambdahat_0_)
-  lambdahat_0 <- diff(c(0,Breslow_Estimator1[,1]))
+  lambdahat_0 <- diff(c(0,Lambdahat_0_))
   
   ##################Compared with true baseline harazrd######################
-  plot(lambdahat_0, 4*yperm^3, xlab = "Breslow Estimator of baseline harzard function", ylab = "True baseline harzard function for weibull")
-  plot(Lambdahat_0, yperm^4, xlab = "Breslow Estimator of baseline cumulative harzard function", ylab = "True baseline cumulative harzard function for weibull")
+  plot(lambdahat_0[match(yperm, Breslow_Estimator1$time)], 4*yperm^3, xlab = "Breslow Estimator of baseline harzard function", ylab = "True baseline harzard function for weibull")
+  plot(Lambdahat_0_[match(yperm, Breslow_Estimator1$time)], yperm^4, xlab = "Breslow Estimator of baseline cumulative harzard function", ylab = "True baseline cumulative harzard function for weibull")
+  
+  #plot(Lambdahat_0[Lambdahat_0 < 1], (yperm^4)[yperm<1], xlab = "Breslow Estimator of baseline cumulative harzard function", ylab = "True baseline cumulative harzard function for weibull")
+  #cbind(Lambdahat_0, yperm^4)
+  
   #plot(Breslow_Estimator$time,  Lambdahat_0)
   mu <- X %*% creg$coefficients
   beta_cur <- creg$coefficients
   iter <- iter + 1
-  objs[iter] <- nloglik_marginal(mu, cens, alpha, lambdahat_0, Lambdahat_0, g_lambdahat_0, g_Lambdahat_0)
+  objs[iter] <- nloglik_marginal(mu, cens, alpha, lambdahat_0, Lambdahat_0_, g_lambdahat_0, g_Lambdahat_0)
   #####check#################
   #(exp(mu) * lambdahat_0)^(1 - cens) *  exp(-exp(mu) * Lambdahat_0)
   #length(mu); length(lambdahat_0)
