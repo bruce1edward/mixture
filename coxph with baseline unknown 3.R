@@ -23,7 +23,7 @@ alpha <- 0.5
 maxiter <- 1000
 tol <- 1E-4
 objs <- numeric(maxiter)
-h <- 0.025
+h <- 0.1 # 0.025
 
 
 # kernel estimation of the baseline hazard function
