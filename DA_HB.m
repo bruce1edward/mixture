@@ -49,9 +49,12 @@ for k = 1:iter
 
     %sample from mixture distribution of theta
      for m_step = 1: mcmc_steps
-                theta_ = theta;       % replace the permutation with the old one
+                theta_ = theta;       % replace the theta with the old one
+                #theta_
                 i = rand(n);          % generate random theta (proposal distribution)
                 p21 = gampdf(theta_,a,b)/gampdf(theta,a,b) + (theta_ - theta)*(sum(order ~= 1:n) - sum(order_ ~= 1:n)); % compute the acceptance raito 
+                #gampdf(theta_,a,b)/gampdf(theta,a,b)
+                #(theta_ - theta)*(sum(order ~= 1:n) - sum(order_ ~= 1:n))
                  if 0 < p21              % if acceptance raito is > 0, then accpet
                        theta = theta_;
                  else
