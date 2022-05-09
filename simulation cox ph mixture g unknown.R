@@ -5,7 +5,7 @@ library(survival)
 set.seed(132)
 n <- 1000
 d <- 10 #1
-quat <- seq(0.05 , 0.4, by = 0.05)
+quat <- seq(0.05 , 0.3, by = 0.05)
 k <- round(n * alpha)
 X <- matrix(rnorm(n*d), nrow = n, ncol = d)
 beta <- rnorm(d)
@@ -22,8 +22,11 @@ maxiter <- 1000
 tol <- 1E-4
 objs <- numeric(maxiter)
 h <- 0.1 #0.025 #0.025
-iteration = 1
+iteration = 100
 mse = array(0, c(iteration, 4, length(quat)))
+track_alpha1 = array(0, c(iteration, length(quat)))
+track_iter = array(0, c(iteration, length(quat)))
+track_objective = array(0, c(iteration, length(quat)))
 
 # kernel estimation of the baseline hazard function
 lambdahat <- function(t, h, Delta){
@@ -139,7 +142,7 @@ for (iters in 1:iteration) {
           }
           #objs[1:12]
         }
-        iter = 5
+        #iter = 5
         if (objs[iter] + tol > objs[iter-1]){
           print(paste0("step size failed at iteration ", iter))
           break
@@ -162,6 +165,9 @@ for (iters in 1:iteration) {
     mse[iters,2,nmethod] = sqrt(sum((-coef(act_naive)*sigma- beta)^2))
     mse[iters,3,nmethod] = sqrt(sum((-coef(act_oracle)*sigma - beta)^2))
     mse[iters,4,nmethod] = abs(alphastar - alpha)
+    track_alpha1[iters,nmethod]  = alpha
+    track_iter[iters,nmethod] = iter
+    track_objective[iters,nmethod] = objs[iter-1]
     nmethod = nmethod + 1
   }
   #nmethod = nmethod + 1
@@ -169,3 +175,8 @@ for (iters in 1:iteration) {
 
 mse_m = colMeans(mse, dims = 1)
 
+library(R.matlab)
+filename <- paste("C:/Users/zwang39/OneDrive - George Mason University - O365 Production/Paper(Mixture)/simulations/cox", "p_g_uk", ".mat", sep = "")
+writeMat(filename, Y = mse_m, n = n, d = d, h = h, track_alpha = track_alpha1, track_number = track_iter, track_objective = track_objective)
+
+boxplot(t(track_alpha1)~quat, xlab = "alpha", ylab = "estimated alpha", ylim = c(0.05, 0.3))

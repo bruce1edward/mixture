@@ -1,11 +1,11 @@
 ##################################################################################
-### cox proportional hazard model with baseline unknown (marginal g(y) is known)
+### cox proportional hazard model with baseline unknown (partial likelihood with marginal g(y) is known)
 ##################################################################################
 library(survival)
 set.seed(132)
 n <- 1000
 d <- 10 #1
-quat <- seq(0.1 , 0.5, by = 0.1)
+quat <- seq(0.05 , 0.3, by = 0.05)
 k <- round(n * alpha)
 X <- matrix(rnorm(n*d), nrow = n, ncol = d)
 beta <- rnorm(d)
@@ -21,10 +21,12 @@ alpha <- 0.5
 maxiter <- 1000
 tol <- 1E-4
 objs <- numeric(maxiter)
-h <- 0.025 #0.025 #0.1
-iteration = 10
-mse = array(0, c(iteration, 4, 6))
-
+h <- 0.1 #0.025 #0.1
+iteration = 100
+mse = array(0, c(iteration, 4, length(quat)))
+track_number <- matrix(0, nrow = iteration, ncol = length(quat))
+track_objective <- matrix(0, nrow = iteration, ncol = length(quat))
+track_alpha1 = array(0, c(iteration, length(quat)))
 # kernel estimation of the baseline hazard function
 lambdahat <- function(t, h, Delta){
   
@@ -41,7 +43,7 @@ Lambdahat <- function(t, h, Delta){
 
 lambdastar <- function(t) rowMeans(sweep(dweibull(outer(t, gamma, FUN = "/"), shape = 1/sigma), MARGIN = 2, FUN = "/", STATS = gamma)) /( (1 - rowMeans(pweibull(outer(t, gamma, FUN = "/"), shape = 1/sigma))) )
 
-Lambdastar <- function(t) -log((1 - rowMeans(pweibull(outer(t, gamma, FUN = "/"), shape = 1/sigma))) )
+Lambdastar <- function(t) -log((1 - rowMeans(pweibull(outer(t, gamma, FUN = "/"), shape = 1/sigma))))
 
 for (iters in 1:iteration) {
   nmethod = 1
@@ -152,6 +154,7 @@ while(iter < maxiter){
 }
 #objs[iter-1]
 #objs[iter]
+#objs[1:10]
 #abs(track_alpha[iter-1] - 0.2)
 #sqrt(sum(-track_beta[iter-1,]*sigma - beta)^2)
 #abs(alpha_cov - 0.2)
@@ -165,10 +168,18 @@ mse[iters,1,nmethod] = sqrt(sum((-track_beta[iter-1,]*sigma - beta)^2))
 mse[iters,2,nmethod] = sqrt(sum((-coef(act_naive)*sigma- beta)^2))
 mse[iters,3,nmethod] = sqrt(sum((-coef(act_oracle)*sigma - beta)^2))
 mse[iters,4,nmethod] = abs(alphastar - alpha)
+track_alpha1[iters,nmethod]  = alpha
+track_number[iters, nmethod] = iter
+track_objective[iters, nmethod] = objs[iter-1]
 nmethod = nmethod + 1
   }
 #nmethod = nmethod + 1
 }
 
 mse_m = colMeans(mse, dims = 1)
+
+
+library(R.matlab)
+filename <- paste("C:/Users/zwang39/OneDrive - George Mason University - O365 Production/Paper(Mixture)/simulations/cox", "p_g_k", ".mat", sep = "")
+writeMat(filename, Y = mse_m, n = n, d = d, h = h, track_alpha = track_alpha1, track_number = track_number, track_objective = track_objective)
 
