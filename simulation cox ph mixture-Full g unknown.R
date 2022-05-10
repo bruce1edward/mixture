@@ -14,13 +14,13 @@ Breslow_Lambda <- function(surv_times, status, X, beta, cumulative){
   return(alpha)
 }
 ##################################################################################
-### cox proportional hazard model with baseline unknown (marginal g(y) is known)
+### cox proportional hazard model with baseline unknown (marginal g(y) is unknown)
 ##################################################################################
 library(survival)
 set.seed(132)
 n <- 1000
 d <- 10 #1
-quat <- seq(0.1 , 0.5, by = 0.1)
+quat <- seq(0.05 , 0.3, by = 0.05)
 k <- round(n * alpha)
 X <- matrix(rnorm(n*d), nrow = n, ncol = d)
 beta <- rnorm(d)
@@ -37,8 +37,11 @@ maxiter <- 1000
 tol <- 1E-4
 objs <- numeric(maxiter)
 h <- 0.1 #0.025 #0.1
-iteration = 1
-mse = array(0, c(iteration, 4, 6))
+iteration = 20
+mse = array(0, c(iteration, 4, length(quat)))
+track_alpha1 = array(0, c(iteration, length(quat)))
+track_iter = array(0, c(iteration, length(quat)))
+track_objective = array(0, c(iteration, length(quat)))
 
 # kernel estimation of the baseline hazard function
 lambdahat <- function(t, h, Delta){
@@ -177,6 +180,9 @@ for (iters in 1:iteration) {
     mse[iters,2,nmethod] = sqrt(sum((-coef(act_naive)*sigma- beta)^2))
     mse[iters,3,nmethod] = sqrt(sum((-coef(act_oracle)*sigma - beta)^2))
     mse[iters,4,nmethod] = abs(alphastar - alpha)
+    track_alpha1[iters,nmethod]  = alpha
+    track_iter[iters,nmethod] = iter
+    track_objective[iters,nmethod] = objs[iter-1]
     nmethod = nmethod + 1
   }
   #nmethod = nmethod + 1
