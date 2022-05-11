@@ -120,6 +120,7 @@ for (iters in 1:iteration) {
       track_alpha[iter+1] <- alpha
       #################Full likelihood for estimating beta#############################
       t1_grad <- -colSums(sweep(X, MARGIN = 1, FUN = "*", STATS = (1-cens)*pcur))
+      #########plot(t1_grad)
       obj_cox_star <- function(beta, X, cens) sum(pcur* ((1 - cens) * (-X%*%beta -log(lambdahat_0_)) + exp(X %*% beta) * Lambdahat_0), na.rm = TRUE)
       #abc <- sum(pcur* ((1 - cens) * (-X%*%coef(act_naive) -log(lambdahat_0_)) + exp(X %*% coef(act_naive)) * Lambdahat_0), na.rm = TRUE)
       grad_cox_star <- function(beta, X, cens)  t1_grad + t(X) %*% (exp(X %*% beta) * Lambdahat_0_ * pcur) 
