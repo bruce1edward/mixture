@@ -3,7 +3,7 @@ tic
 rng('default')
 addpath('..\functions')
 k_n = [0.2 0.25 0.3 0.35 0.4 0.45 0.5];nmethod = 7;
-iters = 20;iter = 400; % number of iteration for EM alogrithm
+iters = 5;iter = 400; % number of iteration for EM alogrithm
 mcmc_steps = 8000; burn_steps = 4000; 
 error_est = zeros(numel(k_n),iters,nmethod);
 r_square = zeros(numel(k_n),iters,nmethod);
@@ -32,7 +32,7 @@ theta = Choose_theta(n,K);
 [beta_EMM, sigma_EMM] =  EM_mal_tricks(Y_P, X, iter, mcmc_steps, burn_steps, theta, beta_naive, order);
 %EM Empirical Bayes
 order = 1:n; theta = Choose_theta(n,K);
-[beta_EMMB, sigma_EMMB] =  EM_mal_EB(Y_P, X, iter, mcmc_steps, burn_steps, theta, beta_naive, order);
+[beta_EMMB, sigma_EMMB] =  EM_mal_tricks_EB(Y_P, X, iter, mcmc_steps, burn_steps, theta, beta_naive, order);
 
 error_est(i,j,1) = norm(beta_naive - beta)/b;
 error_est(i,j,2) = norm(beta_oracle  - beta)/b;

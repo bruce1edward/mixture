@@ -26,6 +26,7 @@ theta = Choose_theta(n,K);
 %k = 0:1:n;
 log_psi = @(gamma) exp(gamma) - 1 - gamma*n
 track_theta = zeros(iters,1);
+track_sum = zeros(iters,1);
 %plot(k, log_psi(k))
 %function [B_hat2, sigma_sq] = EM_mal_tricks_EB(Y_permuted, X, iters, mcmc_steps, burn_steps, theta, beta_start, order)
 %Y_permuted = Y_P; iters = iter; beta_start = beta_naive; order = 1:n; theta = Choose_theta(n,K);
@@ -39,13 +40,27 @@ for k = 1 : iters
         Pi_Y = hat_Pi*Y_permuted;
         B_hat2 = X\(hat_Pi*Y_permuted);    % Get the Least square solution 
         sigma_sq = norm(Pi_Y - X*B_hat2)^2/n;
-        fun = @(gamma) log_psi(gamma) + gamma*sum(diag(hat_Pi)~= 1);
+        fun = @(gamma) n*log_psi(gamma) + gamma*sum(diag(hat_Pi));
         theta = fminbnd(fun,0,2*log(n));
         track_theta(k) = theta;
+        track_sum(k) = sum(diag(hat_Pi));
 end
 %end
+hold on
+plot(track_theta,'*')
+xlabel('EM iteration', 'FontSize', 14)
+ylabel('Empirical Bayes \gamma', 'FontSize', 14)
+export_fig('eb1.pdf')
 
- norm(beta_naive - beta)/b
- norm(beta_EMM  - beta)/b
- norm(B_hat2  - beta)/b
- norm(beta_EM  - beta)/b
+hold on
+plot(track_sum,'*')
+xlabel('EM iteration', 'FontSize', 14)
+ylabel('sum(diag(\Pi))', 'FontSize', 14)
+export_fig('eb2.pdf')
+
+log(n)
+
+norm(beta_naive - beta)/b
+norm(beta_EMM  - beta)/b
+norm(B_hat2  - beta)/b
+norm(beta_EM  - beta)/b
