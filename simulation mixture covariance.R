@@ -9,7 +9,7 @@ k_n <- seq(0.1, 0.6, by = 0.1)
 iteration = 50
 mse = array(0, c(iteration, 5, 6))
 rho = 0.1
-
+########################
 for (iters in 1:iteration) {
   nmethod = 1
   for (alph in k_n){
