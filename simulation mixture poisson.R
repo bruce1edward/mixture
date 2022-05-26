@@ -1,6 +1,4 @@
 library(robustbase)
-library(tictoc)
-library(ggplot2)
 setwd("C:/Users/zwang39/OneDrive - George Mason University - O365 Production/Paper(Mixture)/simulations")
 source("LL_C_Armijo_Poi.R")
 source("P_GLM.R")
@@ -19,7 +17,7 @@ mse = array(0, c(iteration, 7, 6))
 
 #tic("sleeping")
 for (iters in 1:iteration) {
-  nmethod = 1
+   nmethod = 1
 for (alph in k_n){
   #generate data
   #alph = 0.6

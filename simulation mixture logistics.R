@@ -3,8 +3,6 @@ set.seed(132)
 setwd("C:/Users/zwang39/OneDrive - George Mason University - O365 Production/Paper(Mixture)/simulations")
 source("LL_C_Armijo_Bin.R")
 source("P_GLM.R")
-#source("fit_mixture_GLM.R")
-#source("data_generation.R")
 ###Logistic Regression
 n <- 1000
 d <- 1

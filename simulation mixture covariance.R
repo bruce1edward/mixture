@@ -15,13 +15,6 @@ for (iters in 1:iteration) {
   for (alph in k_n){
     #alph = 0.3
     k <- round(n * alph)
-    #var_covar0 <- matrix(nrow = d, ncol = d, 0)
-    #diag(var_covar0) <- 1
-    #u1 <-  c(1,1)
-    #u2 <-  c(1,1)
-    #rho1 <- 0.5
-    #rho2 <- 0.4
-    #var_covar <- var_covar0 + rho1*u1%*%t(u1) + rho2*u2%*%t(u2)
     var_covar <- matrix(nrow = d, ncol = d, rho)
     diag(var_covar) <- 1
     Z <- mvrnorm(n, mu = rep(0,d), Sigma = var_covar)

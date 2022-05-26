@@ -3,8 +3,6 @@ set.seed(132)
 setwd("C:/Users/zwang39/OneDrive - George Mason University - O365 Production/Paper(Mixture)/simulations")
 source("LL_C_IRLS_Gam.R")
 source("P_GLM.R")
-#source("fit_mixture_GLM.R")
-#source("data_generation.R")
 ###Gamma Regression
 n <- 1000
 d <- 10
